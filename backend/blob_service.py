@@ -4,18 +4,11 @@ Azure Blob Storage service – upload PDFs and download generated videos.
 import os
 import uuid
 from azure.storage.blob import BlobServiceClient, ContentSettings
-from dotenv import load_dotenv
-
-load_dotenv()
-
-CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-UPLOAD_CONTAINER = os.getenv("AZURE_STORAGE_UPLOAD_CONTAINER")
-VIDEO_CONTAINER = os.getenv("AZURE_STORAGE_VIDEO_CONTAINER")
-BRANDKIT_CONTAINER = os.getenv("AZURE_STORAGE_BRANDKIT_CONTAINER")
-
+from backend.config import settings
 
 def _get_client() -> BlobServiceClient:
-    return BlobServiceClient.from_connection_string(CONNECTION_STRING)
+    return BlobServiceClient.from_connection_string(settings.AZURE_STORAGE_CONNECTION_STRING)
+
 
 
 def _ensure_container(client: BlobServiceClient, name: str):
@@ -29,10 +22,10 @@ def _ensure_container(client: BlobServiceClient, name: str):
 def upload_pdf(file_bytes: bytes, original_filename: str) -> str:
     """Upload a PDF to Blob Storage and return the blob name."""
     client = _get_client()
-    _ensure_container(client, UPLOAD_CONTAINER)
+    _ensure_container(client, settings.AZURE_STORAGE_UPLOAD_CONTAINER)
 
     blob_name = f"{uuid.uuid4().hex}_{original_filename}"
-    blob_client = client.get_blob_client(UPLOAD_CONTAINER, blob_name)
+    blob_client = client.get_blob_client(settings.AZURE_STORAGE_UPLOAD_CONTAINER, blob_name)
     blob_client.upload_blob(
         file_bytes,
         overwrite=True,
@@ -45,11 +38,11 @@ def upload_pdf(file_bytes: bytes, original_filename: str) -> str:
 def upload_video(video_data, video_name: str, user_email: str = None, metadata: dict = None) -> str:
     """Upload a finished video (bytes or stream) to Blob Storage and return the public URL."""
     client = _get_client()
-    _ensure_container(client, VIDEO_CONTAINER)
+    _ensure_container(client, settings.AZURE_STORAGE_VIDEO_CONTAINER)
 
     # Use a structured path if user_email is provided
     blob_name = f"videos/{user_email}/{video_name}" if user_email else video_name
-    blob_client = client.get_blob_client(VIDEO_CONTAINER, blob_name)
+    blob_client = client.get_blob_client(settings.AZURE_STORAGE_VIDEO_CONTAINER, blob_name)
     
     blob_client.upload_blob(
         video_data,
@@ -66,7 +59,7 @@ def upload_video(video_data, video_name: str, user_email: str = None, metadata: 
 def list_user_videos(user_email: str):
     """List all videos for a specific user from Blob Storage."""
     client = _get_client()
-    container_client = client.get_container_client(VIDEO_CONTAINER)
+    container_client = client.get_container_client(settings.AZURE_STORAGE_VIDEO_CONTAINER)
     
     prefix = f"videos/{user_email}/"
     blobs = container_client.list_blobs(name_starts_with=prefix, include=['metadata'])
@@ -97,7 +90,7 @@ def delete_video_blob(blob_url_or_name: str):
         if len(path_parts) >= 2:
             blob_name = unquote(path_parts[1])
 
-    blob_client = client.get_blob_client(VIDEO_CONTAINER, blob_name)
+    blob_client = client.get_blob_client(settings.AZURE_STORAGE_VIDEO_CONTAINER, blob_name)
     blob_client.delete_blob()
     print(f"DEBUG: Deleted blob '{blob_name}'")
 
@@ -105,12 +98,12 @@ def delete_video_blob(blob_url_or_name: str):
 def upload_logo(file_bytes: bytes, original_filename: str) -> str:
     """Upload a brand logo to Blob Storage and return the public URL."""
     client = _get_client()
-    _ensure_container(client, BRANDKIT_CONTAINER)
+    _ensure_container(client, settings.AZURE_STORAGE_BRANDKIT_CONTAINER)
 
     # Use a fixed name or a prefixed name? Fixed might be better for overwriting
     # but unique is safer. Let's go with unique for now.
     blob_name = f"logo_{uuid.uuid4().hex}_{original_filename}"
-    blob_client = client.get_blob_client(BRANDKIT_CONTAINER, blob_name)
+    blob_client = client.get_blob_client(settings.AZURE_STORAGE_BRANDKIT_CONTAINER, blob_name)
     
     # Determine content type based on extension
     ext = os.path.splitext(original_filename)[1].lower()
@@ -134,10 +127,10 @@ def upload_brand_kit(email: str, brand_kit: dict) -> str:
     """Upload brand kit JSON to Blob Storage."""
     import json
     client = _get_client()
-    _ensure_container(client, BRANDKIT_CONTAINER)
+    _ensure_container(client, settings.AZURE_STORAGE_BRANDKIT_CONTAINER)
     
     blob_name = f"brand_kit_{email.replace('@', '_').replace('.', '_')}.json"
-    blob_client = client.get_blob_client(BRANDKIT_CONTAINER, blob_name)
+    blob_client = client.get_blob_client(settings.AZURE_STORAGE_BRANDKIT_CONTAINER, blob_name)
     
     blob_client.upload_blob(
         json.dumps(brand_kit),
@@ -160,7 +153,7 @@ def download_brand_kit(email: str) -> dict:
     import json
     try:
         blob_name = f"brand_kit_{email.replace('@', '_').replace('.', '_')}.json"
-        data = download_blob(BRANDKIT_CONTAINER, blob_name)
+        data = download_blob(settings.AZURE_STORAGE_BRANDKIT_CONTAINER, blob_name)
         return json.loads(data)
     except Exception as e:
         print(f"DEBUG: Failed to download brand kit from blob: {e}")

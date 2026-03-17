@@ -4,7 +4,6 @@ import {
   Upload,
   Video,
   Settings,
-  Play,
   Sparkles,
   Menu,
   X
@@ -21,7 +20,9 @@ import Contact from './components/Contact';
 import TabButton from './components/TabButton';
 import Profile from './components/Profile';
 import BrandKit from './components/BrandKit';
+import { GenerationProvider } from './context/GenerationContext';
 import { BACKEND_URL } from './constants';
+import Logo from './assets/app-logo.png';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -79,13 +80,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
-      {/* Navbar */}
+    <GenerationProvider onComplete={handleComplete}>
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
+        {/* Navbar */}
       <nav className="sticky top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-xl z-[100] px-4 sm:px-12 flex items-center justify-between border-b border-slate-200 shadow-sm">
         <div className="flex items-center gap-4 lg:gap-12">
           <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('home')}>
-            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
-              <Play size={18} className="text-white ml-0.5" fill="currentColor" />
+            <div className="flex items-center justify-center transition-transform group-hover:scale-110">
+              <img src={Logo} alt="Logo" className="w-[32px] h-[32px] object-contain" />
             </div>
             <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">
               <span className="hidden sm:inline">AI Automated Infographic </span>
@@ -286,7 +288,7 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <UploadAndProcess onComplete={handleComplete} />
+              <UploadAndProcess />
             </motion.div>
           )}
           {activeTab === 'results' && (
@@ -331,8 +333,8 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-20">
             <div className="col-span-1 lg:col-span-2">
               <div className="flex items-center gap-2 mb-8">
-                <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center shadow-lg">
-                  <Play size={16} className="text-white ml-0.5" fill="currentColor" />
+                <div className="flex items-center justify-center">
+                  <img src={Logo} alt="Logo" className="w-[24px] h-[24px] object-contain" />
                 </div>
                 <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">AI Automated <span className="text-slate-600">Infographic</span> Video Generator</span>
               </div>
@@ -410,6 +412,7 @@ export default function App() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </GenerationProvider>
   );
 }

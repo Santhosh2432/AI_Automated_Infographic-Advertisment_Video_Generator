@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, ArrowRight, Sparkles, Users, FileVideo, Award, CheckCircle2, Layout, BarChart3, Settings } from 'lucide-react';
+import { ArrowRight, Sparkles, Users, FileVideo, Award, CheckCircle2, Layout, BarChart3, Settings } from 'lucide-react';
 import Features from './Features';
+import Logo from '../assets/app-logo.png';
 
 const Home = ({ onStart, onExplore }) => {
     return (
@@ -77,9 +78,13 @@ const Home = ({ onStart, onExplore }) => {
                                 <div className="flex-1 flex overflow-hidden">
                                     {/* Sidebar */}
                                     <div className="w-12 border-r border-slate-100 bg-slate-50/50 flex flex-col items-center py-4 gap-4 shrink-0">
-                                        {[Layout, Play, BarChart3, Users, Settings].map((Icon, i) => (
+                                        {[Layout, 'play', BarChart3, Users, Settings].map((Icon, i) => (
                                             <div key={i} className={`p-2 rounded-lg ${i === 2 ? 'bg-slate-200 text-slate-900' : 'text-slate-400'}`}>
-                                                <Icon size={16} />
+                                                {Icon === 'play' ? (
+                                                    <img src={Logo} alt="Play" className="w-[16px] h-[16px] object-contain opacity-40" />
+                                                ) : (
+                                                    <Icon size={16} />
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -124,8 +129,8 @@ const Home = ({ onStart, onExplore }) => {
                                     <div className="flex gap-3 h-full">
                                         {[1, 2, 3, 4, 5].map(i => (
                                             <div key={i} className={`flex-1 rounded-lg border flex flex-col overflow-hidden transition-all hover:scale-[1.02] cursor-pointer ${i === 3 ? 'border-slate-900 bg-white shadow-xl' : 'border-slate-200 bg-slate-50/50'}`}>
-                                                <div className="flex-1 flex items-center justify-center bg-slate-50/20">
-                                                    <Play size={10} className={i === 3 ? 'text-slate-900' : 'text-slate-300'} />
+                                                <div className={`flex-1 flex items-center justify-center transition-all ${i === 3 ? 'scale-110' : 'opacity-40'}`}>
+                                                    <img src={Logo} alt="Logo" className="w-[32px] h-[32px] object-contain" />
                                                 </div>
                                                 <div className="h-4 bg-white border-t border-inherit px-2 flex items-center justify-between">
                                                     <span className="text-[7px] font-black text-slate-400 tracking-tighter uppercase">Scene 0{i}</span>

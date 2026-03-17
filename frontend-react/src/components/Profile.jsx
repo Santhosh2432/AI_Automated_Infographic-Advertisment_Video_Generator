@@ -10,9 +10,9 @@ import {
     Video,
     Camera,
     RefreshCw,
-    Play,
     Trash2
 } from 'lucide-react';
+import Logo from '../assets/app-logo.png';
 
 import axios from 'axios';
 import { BACKEND_URL } from '../constants';
@@ -271,8 +271,8 @@ const Profile = ({ user, onLogout, onUserUpdate }) => {
                         history.map((vid, idx) => (
                             <div key={vid?._id || idx} className="group p-6 rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-16 h-10 rounded-lg bg-slate-900 flex items-center justify-center text-white shrink-0">
-                                        <Play size={16} fill="currentColor" />
+                                    <div className="w-16 h-10 flex items-center justify-center shrink-0">
+                                        <img src={Logo} alt="Play" className="w-[28px] h-[28px] object-contain" />
                                     </div>
                                     <div>
                                         <p className="text-xs font-black text-slate-900 uppercase tracking-widest">{vid?.type === 'infographic' ? '🎬 Infographic' : '👤 Avatar'}</p>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Video, BarChart3, Download, FileText, ExternalLink, Play, Maximize, Sparkles, Edit3, Save, X, RotateCcw } from 'lucide-react';
+import { Video, BarChart3, Download, FileText, ExternalLink, Maximize, Sparkles, Edit3, Save, X, RotateCcw } from 'lucide-react';
 import axios from 'axios';
 import { BACKEND_URL } from '../constants';
 
@@ -10,10 +10,18 @@ const Results = ({ data }) => {
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [currentData, setCurrentData] = useState(data);
 
+    const getNarrationText = (payload) => (
+        payload?.narration ||
+        payload?.script ||
+        payload?.narration_preview ||
+        payload?.script_preview ||
+        ''
+    );
+
     useEffect(() => {
         if (data) {
             setCurrentData(data);
-            setEditedScript(data.narration_preview || data.script_preview || '');
+            setEditedScript(getNarrationText(data));
         }
     }, [data]);
 
@@ -253,7 +261,7 @@ const Results = ({ data }) => {
                             ) : (
                                 <div className="p-6 sm:p-8 h-full overflow-y-auto custom-scrollbar">
                                     <p className="text-sm text-slate-500 font-bold leading-[2] select-text">
-                                        {currentData.narration_preview || currentData.script_preview}
+                                        {getNarrationText(currentData)}
                                     </p>
                                 </div>
                             )}

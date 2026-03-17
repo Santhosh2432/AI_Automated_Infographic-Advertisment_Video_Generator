@@ -1,28 +1,12 @@
 """
 Azure AI Speech service – convert narration text into spoken audio (MP3).
 """
-import os
 from pathlib import Path
 import azure.cognitiveservices.speech as speechsdk
-from dotenv import load_dotenv
-
-load_dotenv()
-
-SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY")
-SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION")
-# Default voice, can be changed (e.g., en-US-AvaMultilingualNeural, en-US-AndrewMultilingualNeural)
-VOICE_NAME = os.getenv("AZURE_SPEECH_VOICE")
-
+from backend.config import settings
 
 def generate_narration_audio(narration_text: str, output_path: Path = None) -> Path:
     """Generate spoken narration audio from text using Azure AI Speech.
-
-    Args:
-        narration_text: The narration script to convert to speech.
-        output_path:    Where to save the MP3 file. Defaults to static/audio/narration.mp3.
-
-    Returns:
-        Path to the saved MP3 file.
     """
     if output_path is None:
         import uuid
@@ -33,8 +17,12 @@ def generate_narration_audio(narration_text: str, output_path: Path = None) -> P
 
     try:
         # Configure speech service
-        speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
-        speech_config.speech_synthesis_voice_name = VOICE_NAME
+        speech_config = speechsdk.SpeechConfig(
+            subscription=settings.AZURE_SPEECH_KEY, 
+            region=settings.AZURE_SPEECH_REGION
+        )
+        speech_config.speech_synthesis_voice_name = settings.AZURE_SPEECH_VOICE
+
         
         # Output to file
         audio_config = speechsdk.audio.AudioOutputConfig(filename=str(output_path))

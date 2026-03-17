@@ -1,8 +1,8 @@
 """
 Video generation services:
 
-1. generate_avatar_video()       – Azure AI Speech Avatar (batch synthesis) [PRESERVED]
-2. generate_infographic_video()  – Pillow animation + OpenAI TTS + FFmpeg   [NEW]
+1. generate_avatar_video()       Azure AI Speech Avatar (batch synthesis) [PRESERVED]
+2. generate_infographic_video()  Pillow animation + OpenAI TTS + FFmpeg   [NEW]
 """
 import os
 import time
@@ -12,34 +12,25 @@ import subprocess
 import tempfile
 import requests as http_requests
 from pathlib import Path
-from dotenv import load_dotenv
-
+from backend.config import settings
 from backend.scene_renderer import render_scenes
 from backend.tts_service import generate_narration_audio
 
-load_dotenv()
-
-#  Azure Speech Avatar (preserved from original)
-
-
-SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY")
-SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION", "eastus")
-
+#  Azure Speech Avatar Constants
 AVATAR_CHARACTER = "lisa"
 AVATAR_STYLE = "casual-sitting"
 VIDEO_FORMAT = "mp4"
 VIDEO_CODEC = "h264"
 SUBTITLE_TYPE = "hard_embedded"
-VOICE_NAME = "en-US-JennyNeural"
 
-BASE_URL = f"https://{SPEECH_REGION}.api.cognitive.microsoft.com"
-
+BASE_URL = f"https://{settings.AZURE_SPEECH_REGION}.api.cognitive.microsoft.com"
 
 def _headers():
     return {
-        "Ocp-Apim-Subscription-Key": SPEECH_KEY,
+        "Ocp-Apim-Subscription-Key": settings.AZURE_SPEECH_KEY,
         "Content-Type": "application/json",
     }
+
 
 
 def _build_ssml(script_text: str) -> str:
@@ -53,7 +44,7 @@ def _build_ssml(script_text: str) -> str:
     return (
         f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '
         f'xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="en-US">'
-        f'<voice name="{VOICE_NAME}">{safe}</voice></speak>'
+        f'<voice name="{settings.AZURE_SPEECH_VOICE}">{safe}</voice></speak>'
     )
 
 
@@ -195,7 +186,7 @@ def _merge_video_audio(frames_dir: Path, audio_path: Path,
     ]
 
     print(f"DEBUG: Running FFmpeg: {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
 
     if result.returncode != 0:
         print(f"DEBUG: FFmpeg stderr: {result.stderr[:2000]}")
@@ -222,7 +213,7 @@ def _merge_video_only(frames_dir: Path, output_path: Path, fps: int = FPS):
     ]
 
     print(f"DEBUG: Running FFmpeg (video-only): {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
 
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg failed (exit {result.returncode}): {result.stderr[:500]}")
@@ -253,6 +244,7 @@ def generate_infographic_video(scene_plan: dict, brand_kit: dict = None) -> str:
 
     # Use a temp dir for intermediate frames
     tmp_dir = Path(tempfile.mkdtemp(prefix="infographic_frames_"))
+    audio_path = None
 
     try:
         # Apply Brand Kit Colors if provided
@@ -280,6 +272,7 @@ def generate_infographic_video(scene_plan: dict, brand_kit: dict = None) -> str:
                 
                 logo_url = brand_kit['logo_url']
                 print(f"DEBUG: Attempting to load brand logo from {logo_url} ...")
+
                 
                 logo_bytes = None
                 
@@ -331,7 +324,6 @@ def generate_infographic_video(scene_plan: dict, brand_kit: dict = None) -> str:
         # Generate narration audio
         print("DEBUG: ═══ Step 2/3: Generating narration audio ═══")
         narration_text = scene_plan.get("narration", "")
-        audio_path = None
         if narration_text:
             try:
                 audio_path = generate_narration_audio(narration_text)
