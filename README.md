@@ -239,7 +239,7 @@ This project is for academic and demonstration purposes.
 
 ---
 
-## 🙏 Acknowledgements
+##  Acknowledgements
 
 - [Azure AI Services](https://azure.microsoft.com/en-us/products/ai-services/)
 - [FastAPI](https://fastapi.tiangolo.com/)
