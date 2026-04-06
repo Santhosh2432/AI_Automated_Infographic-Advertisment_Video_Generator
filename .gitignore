@@ -1,0 +1,16 @@
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Generated videos and frames
+backend/videos/
+backend/temp/
+backend/static/
+frontend-react/dist/
+
+# Logs and status files
+recent_files_list.txt
+status.txt
+diff.txt
+*.log
